@@ -26,7 +26,7 @@ class _AddPageState extends State<AddPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add a new component',
-          style: const TextStyle(color: Colors.white),),
+          style: TextStyle(color: Colors.white),),
 
         iconTheme: const IconThemeData(
           color: Colors.white,
@@ -54,8 +54,8 @@ class _AddPageState extends State<AddPage> {
         onPressed: () {
           if(_addFormKey.currentState?.validate() ?? false) {
             _addFormKey.currentState?.save();
-            ComputerComponent addedComponent = ComputerComponent(name: productName!, manufacturer: manufacturer!, category: category!, price: price!, quantity: quantity!, releaseDate: releaseDate!);
-            print(addedComponent);
+            ComputerComponent addedComponent = ComputerComponent(name: productName!, manufacturer: manufacturer!,
+                category: category!, price: price!, quantity: quantity!, releaseDate: releaseDate!);
 
             Navigator.pop(context, addedComponent);
           }
@@ -98,7 +98,7 @@ class _AddPageState extends State<AddPage> {
       onTap: () async {
         DateTime? pickedDate = await showDatePicker(
             context: context,
-            initialDate: releaseDate == null ? DateTime.now() : releaseDate,
+            initialDate: releaseDate ?? DateTime.now(),
             firstDate: DateTime(2000),
             lastDate: DateTime(2101)
         );
@@ -107,10 +107,79 @@ class _AddPageState extends State<AddPage> {
           setState(() {
             // fuck you
             // _date.text = "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
-            _date.text = new DateFormat("yyyy-MM-dd").format(pickedDate);
+            _date.text = DateFormat("yyyy-MM-dd").format(pickedDate);
           });
         }
       },
+    );
+  }
+
+  StatefulWidget productNameInputSetup() {
+    return TextFormField(
+        keyboardType: TextInputType.text,
+        validator: (value) {
+          if(value == null || value.isEmpty) {
+            return "Invalid product name";
+          }
+          return null;
+        },
+
+        onSaved: (value) {
+          setState(() {
+            productName = value;
+          });
+        },
+
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(),
+          labelText: 'Product name',
+        )
+    );
+  }
+
+  StatefulWidget categoryInputSetup() {
+    return TextFormField(
+        keyboardType: TextInputType.text,
+        validator: (value) {
+          if(value == null || value.isEmpty) {
+            return "Invalid product category";
+          }
+          return null;
+        },
+
+        onSaved: (value) {
+          setState(() {
+            category = value;
+          });
+        },
+
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(),
+          labelText: 'Category',
+        )
+    );
+  }
+
+  StatefulWidget manufacturerInputSetup() {
+    return TextFormField(
+        keyboardType: TextInputType.text,
+        validator: (value) {
+          if(value == null || value.isEmpty) {
+            return "Invalid manufacturer name";
+          }
+          return null;
+        },
+
+        onSaved: (value) {
+          setState(() {
+            manufacturer = value;
+          });
+        },
+
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(),
+          labelText: 'Manufacturer',
+        )
     );
   }
 
@@ -175,71 +244,10 @@ class _AddPageState extends State<AddPage> {
           mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            TextFormField(
-              keyboardType: TextInputType.text,
-              validator: (value) {
-                if(value == null || value.isEmpty) {
-                  return "Invalid product name";
-                }
-                return null;
-              },
-
-              onSaved: (value) {
-                setState(() {
-                  productName = value;
-                });
-              },
-
-              decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Product name',
-              )
-            ),
-
+            productNameInputSetup(),
             datePickerSetup(),
-
-            TextFormField(
-                keyboardType: TextInputType.text,
-                validator: (value) {
-                  if(value == null || value.isEmpty) {
-                    return "Invalid product category";
-                  }
-                  return null;
-                },
-
-                onSaved: (value) {
-                  setState(() {
-                    category = value;
-                  });
-                },
-
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Category',
-                )
-            ),
-
-            TextFormField(
-                keyboardType: TextInputType.text,
-                validator: (value) {
-                  if(value == null || value.isEmpty) {
-                    return "Invalid manufacturer name";
-                  }
-                  return null;
-                },
-
-                onSaved: (value) {
-                  setState(() {
-                    manufacturer = value;
-                  });
-                },
-
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Manufacturer',
-                )
-            ),
-
+            categoryInputSetup(),
+            manufacturerInputSetup(),
             priceInputSetup(),
             quantityInputSetup(),
             addButtonSetup()

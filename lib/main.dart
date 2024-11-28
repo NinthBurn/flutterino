@@ -8,7 +8,7 @@ import 'package:techware_flutter/repository/ComputerComponentRepository.dart';
 
 void main() {
   runApp(
-      MyApp()
+      const MyApp()
   );
 }
 
@@ -36,8 +36,6 @@ class MyApp extends StatelessWidget {
 
         routes: {
           "/add": (context) => AddPage(),
-          "/edit": (context) => AddPage(),
-          "/inspect": (context) => HomeWidget(),
           "/": (context) => HomeWidget(),
         },
     );
@@ -59,7 +57,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   void initState() {
     super.initState();
 
-    for(int i = 0; i < 15; ++i) {
+    for(int i = 0; i < 20; ++i) {
       repository.add(ComputerComponent(name: "Product ${i+1}", manufacturer: "AMD", category: "Category ${i+1}", price: (i+1) * 99.99, quantity: (i+1)*10, releaseDate: DateTime.now()));
     }
 
@@ -70,7 +68,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     final addedComponent = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AddPage(),  // Replace with your actual add screen
+        builder: (context) => AddPage(),
       ),
     );
 
@@ -86,53 +84,62 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   ListView componentListWidget() {
     return ListView.builder(
+      addAutomaticKeepAlives: true,
       itemCount: products.length,
+
       itemBuilder: (context, index) {
-        // return ProductWidget(products[index]);
+        final product = products[index];
+
         return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Card(
-                color: const Color(0xfff4fff4),
-                child: ListTile(
-                    onTap: () {
-                      print(index.toString());
+          padding: const EdgeInsets.all(8.0),
+          child: Card(
+            color: const Color(0xfff4fff4),
+            child: ListTile(
+              key: ValueKey(product.id),
 
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => InspectPage(component: products[index]),
-                        ),
-                      );
-                    },
+              onTap: () {
+                print("Tapped on item with index $index");
 
-                    title: productCardWidget(context, this.products[index]),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => InspectPage(component: products[index]),
+                  ),
+                );
+              },
 
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        editButtonWidget(context, index),
-                        const SizedBox(width: 10), 
-                        deleteButtonWidget(context, index),
-                        const SizedBox(width: 16),
-                      ],
-                    )
-                )
-            )
+              title: productCardWidget(context, product),
+
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _editButtonWidget(context, index),
+                  const SizedBox(width: 10),
+                  _deleteButtonWidget(context, index, product.id),
+                  const SizedBox(width: 16),
+                ],
+              ),
+            ),
+          ),
         );
       },
     );
   }
 
   Widget productCardWidget(BuildContext context, ComputerComponent component) {
+    print("building widget for " + component.id.toString());
+
     return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(component.category,
             style: const TextStyle(fontSize: 12),
           ),
+
           Text(component.name,
             style: const TextStyle(fontSize: 14),
           ),
+
           Text('${component.price.toStringAsFixed(2)}\$, ${component.quantity} ${component.quantity > 1 ? 'units in stock' : 'unit in stock'}',
             style: const TextStyle(fontSize: 12),
           ),
@@ -140,72 +147,82 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
-  Widget deleteButtonWidget(BuildContext context, int index) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: const Color(0xff99cc00), // White background for the first button
-        shape: BoxShape.circle,
-      ),
-      child: IconButton(
-        icon: const Icon(Icons.delete, color: Colors.white),
-        onPressed: () {
-          showConfirmDialog(context, "Do you want to delete this item?").then((onValue) => {
-            if(onValue == true) {
-              setState(() {
-                this.repository.remove(index);
-                this.products.removeAt(index);
-              })
-            }
-          });
-
-          print('second button pressed');
-        },
-      ),
-    );
-  }
-
-  Widget editButtonWidget(BuildContext context, int index) {
+  Widget _deleteButtonWidget(BuildContext context, int index, int productId) {
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xff99cc00), // White background for the first button
         shape: BoxShape.circle,
       ),
+
+      child: IconButton(
+        icon: const Icon(Icons.delete, color: Colors.white),
+
+        onPressed: () {
+          _showConfirmDialog(context, "Do you want to delete this item?").then((onValue) => {
+            if(onValue == true) {
+              repository.remove(productId),
+
+              setState(() {
+                products.removeAt(index);
+              })
+            }
+          });
+        },
+
+      ),
+    );
+  }
+
+  Widget _editButtonWidget(BuildContext context, int index) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xff99cc00), // White background for the first button
+        shape: BoxShape.circle,
+      ),
+
       child: IconButton(
         icon: const Icon(Icons.edit, color: Colors.white),
+
         onPressed: () async {
-          ComputerComponent component = await Navigator.push(
+          ComputerComponent? component = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => EditPage(component: products[index]),
             ),
           );
 
-          setState(() {
-            this.repository.update(component);
-            this.products[index] = component;
-          });
+          if(component != null) {
+            repository.update(component);
+
+            setState(() {
+              products[index] = component;
+            });
+          }
         },
+
       ),
     );
   }
 
-  Future<bool> showConfirmDialog(BuildContext context, String message) async {
+  Future<bool> _showConfirmDialog(BuildContext context, String message) async {
     // set up the buttons
     Widget cancelButton = ElevatedButton(
-      child: Text("No"),
+      child: const Text("No"),
       onPressed: () {
         Navigator.of(context).pop(false);
       },
     );
+
     Widget continueButton = ElevatedButton(
-      child: Text("Yes"),
+      child: const Text("Yes"),
       onPressed: () {
         // returnValue = true;
         Navigator.of(context).pop(true);
       },
-    ); // set up the AlertDialog
+    );
+
     AlertDialog alert = AlertDialog(
-      title: Text("Delete item"),
+      title: const Text("Delete item"),
       content: Text(message),
       actions: [
         cancelButton,
@@ -219,6 +236,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         return alert;
       },
     );
+
     return result ?? false;
   }
 

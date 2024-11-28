@@ -29,12 +29,12 @@ class _EditPageState extends State<EditPage> {
   void initState() {
     super.initState();
 
-    productName = this.widget.component.name;
-    category = this.widget.component.category;
-    manufacturer = this.widget.component.manufacturer;
-    releaseDate = this.widget.component.releaseDate;
-    price = this.widget.component.price;
-    quantity = this.widget.component.quantity;
+    productName = widget.component.name;
+    category = widget.component.category;
+    manufacturer = widget.component.manufacturer;
+    releaseDate = widget.component.releaseDate;
+    price = widget.component.price;
+    quantity = widget.component.quantity;
     _date.text = DateFormat("yyyy-MM-dd").format(releaseDate!);
   }
 
@@ -61,7 +61,7 @@ class _EditPageState extends State<EditPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
-        Center(child: addForm())
+        Center(child: editForm())
       ],
     );
   }
@@ -71,10 +71,10 @@ class _EditPageState extends State<EditPage> {
         onPressed: () {
           if(_editFormKey.currentState?.validate() ?? false) {
             _editFormKey.currentState?.save();
-            ComputerComponent addedComponent = ComputerComponent(name: productName!, manufacturer: manufacturer!, category: category!, price: price!, quantity: quantity!, releaseDate: releaseDate!);
-            addedComponent.id = widget.component.id;
+            ComputerComponent selectedComponent = ComputerComponent(name: productName!, manufacturer: manufacturer!, category: category!, price: price!, quantity: quantity!, releaseDate: releaseDate!);
+            selectedComponent.id = widget.component.id;
 
-            Navigator.pop(context, addedComponent);
+            Navigator.pop(context, selectedComponent);
           }
         },
 
@@ -114,7 +114,7 @@ class _EditPageState extends State<EditPage> {
       onTap: () async {
         DateTime? pickedDate = await showDatePicker(
             context: context,
-            initialDate: releaseDate == null ? DateTime.now() : releaseDate,
+            initialDate: releaseDate ?? DateTime.now(),
             firstDate: DateTime(2000),
             lastDate: DateTime(2101)
         );
@@ -182,85 +182,95 @@ class _EditPageState extends State<EditPage> {
     );
   }
 
-  Widget addForm() {
+  StatefulWidget productNameInputSetup() {
+    return TextFormField(
+        keyboardType: TextInputType.text,
+        initialValue: productName,
+        validator: (value) {
+          if(value == null || value.isEmpty) {
+            return "Invalid product name";
+          }
+          return null;
+        },
+
+        onSaved: (value) {
+          setState(() {
+            productName = value;
+          });
+        },
+
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(),
+          labelText: 'Product name',
+        )
+    );
+  }
+
+  StatefulWidget categoryInputSetup() {
+    return TextFormField(
+        keyboardType: TextInputType.text,
+        initialValue: category,
+        validator: (value) {
+          if(value == null || value.isEmpty) {
+            return "Invalid product category";
+          }
+          return null;
+        },
+
+        onSaved: (value) {
+          setState(() {
+            category = value;
+          });
+        },
+
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(),
+          labelText: 'Category',
+        )
+    );
+  }
+
+  StatefulWidget manufacturerInputSetup() {
+    return TextFormField(
+        keyboardType: TextInputType.text,
+        initialValue: manufacturer,
+        validator: (value) {
+          if(value == null || value.isEmpty) {
+            return "Invalid manufacturer name";
+          }
+          return null;
+        },
+
+        onSaved: (value) {
+          setState(() {
+            manufacturer = value;
+          });
+        },
+
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(),
+          labelText: 'Manufacturer',
+        )
+    );
+  }
+
+  Widget editForm() {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width * 0.8,
       height: MediaQuery.sizeOf(context).height * 0.85,
+
       child: Form(
         key: _editFormKey,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.center,
+
           children: [
-            TextFormField(
-              keyboardType: TextInputType.text,
-              initialValue: productName,
-              validator: (value) {
-                if(value == null || value.isEmpty) {
-                  return "Invalid product name";
-                }
-                return null;
-              },
-
-              onSaved: (value) {
-                setState(() {
-                  productName = value;
-                });
-              },
-
-              decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Product name',
-              )
-            ),
-
+            productNameInputSetup(),
             datePickerSetup(),
-
-            TextFormField(
-                keyboardType: TextInputType.text,
-                initialValue: category,
-                validator: (value) {
-                  if(value == null || value.isEmpty) {
-                    return "Invalid product category";
-                  }
-                  return null;
-                },
-
-                onSaved: (value) {
-                  setState(() {
-                    category = value;
-                  });
-                },
-
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Category',
-                )
-            ),
-
-            TextFormField(
-                keyboardType: TextInputType.text,
-                initialValue: manufacturer,
-                validator: (value) {
-                  if(value == null || value.isEmpty) {
-                    return "Invalid manufacturer name";
-                  }
-                  return null;
-                },
-
-                onSaved: (value) {
-                  setState(() {
-                    manufacturer = value;
-                  });
-                },
-
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Manufacturer',
-                )
-            ),
-
+            categoryInputSetup(),
+            manufacturerInputSetup(),
             priceInputSetup(),
             quantityInputSetup(),
             editButtonSetup()

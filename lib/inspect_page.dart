@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:techware_flutter/models/ComputerComponent.dart';
 
@@ -17,7 +16,6 @@ class InspectPage extends StatefulWidget {
 }
 
 class _InspectPageState extends State<InspectPage> {
-
   String? productName, category, manufacturer;
   DateTime? releaseDate;
   double? price;
@@ -28,20 +26,20 @@ class _InspectPageState extends State<InspectPage> {
   void initState() {
     super.initState();
 
-    productName = this.widget.component.name;
-    category = this.widget.component.category;
-    manufacturer = this.widget.component.manufacturer;
-    releaseDate = this.widget.component.releaseDate;
-    price = this.widget.component.price;
-    quantity = this.widget.component.quantity;
-    id = this.widget.component.id;
+    productName = widget.component.name;
+    category = widget.component.category;
+    manufacturer = widget.component.manufacturer;
+    releaseDate = widget.component.releaseDate;
+    price = widget.component.price;
+    quantity = widget.component.quantity;
+    id = widget.component.id;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add a new component',
+        title: Text('Inspecting ${productName!}',
           style: const TextStyle(color: Colors.white),),
 
         iconTheme: const IconThemeData(
@@ -60,7 +58,7 @@ class _InspectPageState extends State<InspectPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
-        Center(child: addForm())
+        Center(child: inspectForm())
       ],
     );
   }
@@ -77,7 +75,7 @@ class _InspectPageState extends State<InspectPage> {
     );
   }
 
-  Widget addForm() {
+  Widget inspectForm() {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width * 0.8,
       height: MediaQuery.sizeOf(context).height * 0.85,
@@ -135,7 +133,7 @@ class _InspectPageState extends State<InspectPage> {
             ),
 
             Text("Product ID: $id",
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.orange,
                 fontSize: 18,
               )
