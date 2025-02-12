@@ -41,6 +41,7 @@ class _EditPageState extends State<EditPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text('Editing ${productName!}',
           style: const TextStyle(color: Colors.white),),
